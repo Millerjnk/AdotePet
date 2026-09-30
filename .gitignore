@@ -1,2 +1,10 @@
-# Ignorar .venv
+# Ambiente virtual
 .venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Banco de dados local
+# db.sqlite3
