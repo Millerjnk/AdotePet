@@ -103,3 +103,17 @@ class CronogramaVisita(models.Model):
         ordering= ["-data", "horario"]
     def __str__(self):
         return f"{self.pet} - {self.adotante} - {self.data}"
+
+class TermoAdocao(models.Model):
+    pet = models.OneToOneField(Pet, on_delete=models.PROTECT, related_name="termo_adocao")
+    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="termo_adotante")
+    responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="termo_responsavel")
+    data_adocao = models.DateField()
+    termos_aceitos = models.BooleanField(default=False)
+    observacoes = models.TextField(blank=True)
+    class Meta:
+        verbose_name = "Termo de Adoção"
+        verbose_name_plural = "Termos de Adoção"
+        ordering = ["-data_adocao"]
+    def __str__(self):
+        return f"{self.pet} - {self.adotante} - {self.responsavel}"
