@@ -117,3 +117,32 @@ class TermoAdocao(models.Model):
         ordering = ["-data_adocao"]
     def __str__(self):
         return f"{self.pet} - {self.adotante} - {self.responsavel}"
+
+
+class AplicacaoAdocao(models.Model):
+    STATUS = [
+        ('P', 'Pendente'),
+        ('A', 'Aprovada'),
+        ('R', 'Rejeitada'),
+        ('C', 'Cancelada'),
+    ]
+
+    pet = models.ForeignKey(Pet, on_delete=models.PROTECT, related_name="aplicacoes_adocao")
+
+    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="aplicacoes_adocao")
+
+    data_solicitacao = models.DateField()
+    status = models.CharField(
+        max_length=1,
+        choices=STATUS,
+        default='P'
+    )
+    observacoes = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Aplicação de Adoção"
+        verbose_name_plural = "Aplicações de Adoção"
+        ordering = ["-data_solicitacao"]
+
+    def __str__(self):
+        return f"{self.pet} - {self.adotante} - {self.get_status_display()}"
