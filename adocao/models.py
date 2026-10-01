@@ -11,10 +11,15 @@ SEXOS = [
     ('M', 'Macho'),
     ('F', 'Fêmea')
 ]
-STATUS = [
+STATUS_ADOÇAO = [
     ('D', 'Disponível'),
     ('A', 'Em Andamento'),
     ('C', 'Adotado')
+]
+STATUS_VISITA = [
+    ('A', 'Agendada'),
+    ('R', 'Realizada'),
+    ('C', 'Cancelada')
 ]
 TIPOS = [
         ('Vacina', 'Vacina'),
@@ -58,7 +63,7 @@ class Pet(models.Model):
     sexo = models.CharField(max_length=1, choices=SEXOS)
     porte = models.CharField(max_length=1, choices=PORTES)
     peso = models.DecimalField(max_digits=5,decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=1, choices=STATUS, default='D')
+    status = models.CharField(max_length=1, choices=STATUS_ADOÇAO, default='D')
     raca = models.ForeignKey(Raca, on_delete=models.PROTECT, related_name="pets")
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="pets")
     foto = models.ImageField(upload_to='pets/', null= True, blank=True)  # Definido assim temporariamente
@@ -84,5 +89,17 @@ class RegistroMedico(models.Model):
     def __str__(self):
         return f"{self.tipo} - {self.pet} - {self.data}"
 
-
-# Create your models here.
+class CronogramaVisita(models.Model):
+    pet = models.ForeignKey(Pet, on_delete=models.PROTECT, related_name="visitas")
+    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="visitas")
+    data = models.DateField()
+    horario = models.TimeField()
+    local = models.CharField(max_length=100)
+    status = models.CharField(max_length=1, choices=STATUS_VISITA, default='A')
+    observacoes = models.TextField(blank=True)
+    class Meta:
+        verbose_name= "Visita"
+        verbose_name_plural= "Visitas"
+        ordering= ["-data", "horario"]
+    def __str__(self):
+        return f"{self.pet} - {self.adotante} - {self.data}"

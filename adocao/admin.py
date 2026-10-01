@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Especie, Raca, Usuario, Pet, RegistroMedico
+from .models import Especie, Raca, Usuario, Pet, RegistroMedico, CronogramaVisita
 
 admin.site.register(Usuario, UserAdmin)
 
@@ -30,3 +30,10 @@ class RegistroMedicoAdmin(admin.ModelAdmin):
     list_filter=("tipo", "data")
     search_fields=("pet__nome", "tipo", "veterinario", "clinica",)
     ordering=("-data",)
+
+@admin.register(CronogramaVisita)
+class VisitasAdmin(admin.ModelAdmin):
+    list_display=("pet", "adotante", "data", "horario", "local", "status")
+    list_filter=("data", "status")
+    search_fields=("pet__nome", "adotante__username", "adotante__first_name", "adotante__last_name",)
+    ordering=("-data", "horario",)
