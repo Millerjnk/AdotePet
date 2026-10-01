@@ -37,8 +37,8 @@ class Usuario(AbstractUser):
 class Especie(models.Model):
     nome =models.CharField(max_length=100, unique=True)
     class Meta:
-        verbose_name= "Especie"
-        verbose_name_plural= "Especies" 
+        verbose_name= "Espécie"
+        verbose_name_plural= "Espécies" 
         ordering = ["nome"]
     def __str__(self):
         return self.nome
@@ -50,7 +50,7 @@ class Raca(models.Model):
     )
     class Meta:
         verbose_name="Raça"
-        verbose_name="Raças"
+        verbose_name_plural="Raças"
         ordering=["nome"]
         unique_together=("nome","especie")
     def __str__(self):
