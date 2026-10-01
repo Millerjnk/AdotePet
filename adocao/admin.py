@@ -42,5 +42,5 @@ class VisitasAdmin(admin.ModelAdmin):
 class TermoAdocaoAdmin(admin.ModelAdmin):
     list_display=("pet", "adotante", "responsavel", "data_adocao")
     list_filter=("data_adocao", "termos_aceitos")
-    search_fields=("pet__nome", "adotante__username", "adotante__first_name", "adotante__last_name", "responsavel__username", "responsavel__first_name", "responsavel__last_name")
+    search_fields=("pet__nome", "adotante__username", "adotante__first_name", "adotante__last_name", "responsavel__username", "responsavel__first_name", "responsavel__last_name",)
     ordering=("-data_adocao", "pet__nome",)
