@@ -28,13 +28,39 @@ TIPOS = [
         ('Medicação', 'Medicação'),
         ('Cirurgia', 'Cirurgia'),
         ('Castração', 'Castração'),
-        ('Outro', 'Outro'),
+        ('Outro', 'Outro')
     ]
+TIPOS_USUARIO = [
+    ('A', 'Adotante'),
+    ('R', 'Responsável')
+]
+TIPO_MORADIA = [
+    ('A', 'Apartamento'),
+    ('C', 'Casa'),
+    ('O', 'Outro')
+]
 
 class Usuario(AbstractUser):
-    pass
+    tipo_usuario = models.CharField(max_length=1, choices=TIPOS_USUARIO, default='A')
+    telefone = models.CharField(max_length=20)
+    
+class Endereco(models.Model):
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name="endereco")
+    cep= models.CharField(max_length=9)
+    logradouro = models.CharField(max_length=100)
+    numero = models.CharField(max_length=10)
+    complemento = models.CharField(max_length=100, blank=True)
+    bairro = models.CharField(max_length=50)
+    cidade = models.CharField(max_length=50)
+    uf = models.CharField(max_length=2)
+    class Meta:
+        verbose_name="Endereço"
+        verbose_name_plural="Endereços"
+        ordering=["usuario"]
+    def __str__(self):
+        return f"{self.usuario} - {self.cidade}/{self.uf}"
 
-class Especie(models.Model):
+class Especie(models.Model):    
     nome =models.CharField(max_length=100, unique=True)
     class Meta:
         verbose_name= "Espécie"
@@ -89,9 +115,32 @@ class RegistroMedico(models.Model):
     def __str__(self):
         return f"{self.tipo} - {self.pet} - {self.data}"
 
+class AplicacaoAdocao(models.Model):
+    STATUS = [
+        ('P', 'Pendente'),
+        ('A', 'Aprovada'),
+        ('R', 'Rejeitada'),
+        ('C', 'Cancelada'),
+    ]
+
+    pet = models.ForeignKey(Pet, on_delete=models.PROTECT, related_name="aplicacoes_adocao")
+    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="aplicacoes_adocao")
+    data_solicitacao = models.DateField()
+    status = models.CharField(max_length=1,choices=STATUS,default='P')
+    motivacao = models.TextField()
+    outros_animais = models.BooleanField(default=False)
+    tipo_moradia = models.CharField(max_length=1, choices=TIPO_MORADIA)
+
+    class Meta:
+        verbose_name = "Aplicação de Adoção"
+        verbose_name_plural = "Aplicações de Adoção"
+        ordering = ["-data_solicitacao"]
+        unique_together = ("pet", "adotante")
+    def __str__(self):
+        return f"{self.pet} - {self.adotante} - {self.get_status_display()}"
+    
 class CronogramaVisita(models.Model):
-    pet = models.ForeignKey(Pet, on_delete=models.PROTECT, related_name="visitas")
-    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="visitas")
+    aplicacao = models.ForeignKey(AplicacaoAdocao, on_delete=models.PROTECT, related_name="visitas")
     data = models.DateField()
     horario = models.TimeField()
     local = models.CharField(max_length=100)
@@ -102,11 +151,10 @@ class CronogramaVisita(models.Model):
         verbose_name_plural= "Visitas"
         ordering= ["-data", "horario"]
     def __str__(self):
-        return f"{self.pet} - {self.adotante} - {self.data}"
+        return f"{self.aplicacao.pet} - {self.aplicacao.adotante} - {self.data}"
 
 class TermoAdocao(models.Model):
-    pet = models.OneToOneField(Pet, on_delete=models.PROTECT, related_name="termo_adocao")
-    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="termo_adotante")
+    aplicacao = models.OneToOneField(AplicacaoAdocao, on_delete=models.PROTECT, related_name="termo_adocao")
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="termo_responsavel")
     data_adocao = models.DateField()
     termos_aceitos = models.BooleanField(default=False)
@@ -116,33 +164,4 @@ class TermoAdocao(models.Model):
         verbose_name_plural = "Termos de Adoção"
         ordering = ["-data_adocao"]
     def __str__(self):
-        return f"{self.pet} - {self.adotante} - {self.responsavel}"
-
-
-class AplicacaoAdocao(models.Model):
-    STATUS = [
-        ('P', 'Pendente'),
-        ('A', 'Aprovada'),
-        ('R', 'Rejeitada'),
-        ('C', 'Cancelada'),
-    ]
-
-    pet = models.ForeignKey(Pet, on_delete=models.PROTECT, related_name="aplicacoes_adocao")
-
-    adotante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="aplicacoes_adocao")
-
-    data_solicitacao = models.DateField()
-    status = models.CharField(
-        max_length=1,
-        choices=STATUS,
-        default='P'
-    )
-    observacoes = models.TextField(blank=True)
-
-    class Meta:
-        verbose_name = "Aplicação de Adoção"
-        verbose_name_plural = "Aplicações de Adoção"
-        ordering = ["-data_solicitacao"]
-
-    def __str__(self):
-        return f"{self.pet} - {self.adotante} - {self.get_status_display()}"
+        return f"{self.aplicacao.pet} - {self.aplicacao.adotante} - {self.responsavel}"

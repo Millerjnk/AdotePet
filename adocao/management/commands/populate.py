@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from faker import Faker
 from adocao.models import (
-    Especie,Raca,Pet,RegistroMedico,CronogramaVisita,TermoAdocao,AplicacaoAdocao,
+    Especie,Raca,Pet,RegistroMedico,CronogramaVisita,TermoAdocao,AplicacaoAdocao,Endereco
 )
 
 class Command(BaseCommand):
@@ -12,17 +12,52 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fake = Faker("pt_BR")
         User = get_user_model()
-        usuarios = list(User.objects.all())
-        if not usuarios:
-            self.stdout.write(
-                self.style.ERROR(
-                    "Nenhum usuário encontrado no banco."
-                )
+        adotantes = []
+        responsaveis = []
+        for i in range(80):
+            usuario = User.objects.create_user(
+                username = f"adotante{i+1}",
+                password ="123456",
+                first_name = fake.first_name(),
+                last_name = fake.last_name(),
+                email = f"adotante{i+1}@gmail.com",
+                telefone = fake.phone_number(),
+                tipo_usuario = "A",
             )
-            return
+            adotantes.append(usuario)
+        for i in range(20):
+            usuario = User.objects.create_user(
+                username=f"responsavel{i + 1}",
+                password="123456",
+                first_name=fake.first_name(),
+                last_name=fake.last_name(),
+                email=f"responsavel{i + 1}@email.com",
+                telefone=fake.phone_number(),
+                tipo_usuario="R",
+            )
+            responsaveis.append(usuario)
+
         self.stdout.write(
             self.style.SUCCESS(
-                f"{len(usuarios)} usuários encontrados."
+                f"{len(adotantes)} adotantes encontrados."
+                f"{len(responsaveis)} responsáveis encontrados."
+            )
+        )
+        usuarios = adotantes + responsaveis
+        for usuario in usuarios:
+            Endereco.objects.create(
+                usuario = usuario,
+                cep = fake.postcode(),
+                logradouro = fake.street_name(),
+                numero = str(random.randint(1, 2000)),
+                complemento = random.choice(["", "Apto 101", "Apto 202", "Casa", "Bloco B", ""]),
+                bairro = fake.bairro(),
+                cidade = fake.city(),
+                uf = fake.estado_sigla(),
+            )
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"{len(usuarios)} endereços criados"
             )
         )
         especies_nomes=[
@@ -79,7 +114,7 @@ class Command(BaseCommand):
                 peso=Decimal(str(round(random.uniform(1.0, 35.0), 2))),
                 status=random.choice(["D", "A", "C"]),
                 raca=raca,
-                responsavel=random.choice(usuarios),
+                responsavel=random.choice(responsaveis),
             )
             pets.append(pet)
         self.stdout.write(
@@ -112,26 +147,33 @@ class Command(BaseCommand):
             self.style.SUCCESS("200 registros médicos criados.")
         )
         aplicacoes = []
-        for _ in range(100):
+        combinacoes_usadas = set()
+        while len(aplicacoes) < 100:
+            pet = random.choice(pets)
+            adotante = random.choice(adotantes)
+            combinacao = (pet.id, adotante.id)
+            if combinacao in combinacoes_usadas:
+                continue
             aplicacao = AplicacaoAdocao.objects.create(
-                pet=random.choice(pets),
-                adotante=random.choice(usuarios),
+                pet= pet,
+                adotante=adotante,
                 data_solicitacao=fake.date_between(
                     start_date="-2y",
                     end_date="today",
                 ),
-                status=random.choice(["P", "A", "R", "C"]),
-                observacoes=fake.sentence(),
+                status=random.choices(["P", "A", "R", "C"], weights=[20, 55, 15, 10], k=1)[0],
+                motivacao=fake.paragraph(nb_sentences=3),
+                outros_animais = random.choice([True, False]),
+                tipo_moradia = random.choice(["A", "C", "O"]),
             )
-
+            combinacoes_usadas.add(combinacao)
             aplicacoes.append(aplicacao)
         self.stdout.write(
             self.style.SUCCESS("100 aplicações de adoção criadas.")
         )
         for _ in range(100):
             CronogramaVisita.objects.create(
-                pet=random.choice(pets),
-                adotante=random.choice(usuarios),
+                aplicacao = random.choice(aplicacoes),
                 data=fake.date_between(
                     start_date="-1y",
                     end_date="+6m",
@@ -147,16 +189,12 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS("100 visitas criadas.")
         )
-        pets_disponiveis_para_termo = pets[:50]
-
-        for pet in pets_disponiveis_para_termo:
-            adotante = random.choice(usuarios)
-            responsavel = random.choice(usuarios)
-
+    
+        aplicacoes_para_termo = random.sample(aplicacoes, 50)
+        for aplicacao in aplicacoes_para_termo:
             TermoAdocao.objects.create(
-                pet=pet,
-                adotante=adotante,
-                responsavel=responsavel,
+                aplicacao = aplicacao,
+                responsavel=random.choice(responsaveis),
                 data_adocao=fake.date_between(
                     start_date="-2y",
                     end_date="today",

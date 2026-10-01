@@ -1,9 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Especie, Raca, Usuario, Pet, RegistroMedico, CronogramaVisita, TermoAdocao, AplicacaoAdocao
+from .models import Especie, Raca, Usuario, Pet, RegistroMedico, CronogramaVisita, TermoAdocao, AplicacaoAdocao, Endereco
 
-admin.site.register(Usuario, UserAdmin)
 
+class EnderecoInline(admin.StackedInline):
+    model= Endereco
+    extra= 0
+    max_num=1 
+
+@admin.register(Usuario)
+class UsuarioAdmin(UserAdmin):
+    inlines = [EnderecoInline]
+    fieldsets = UserAdmin.fieldsets + (
+            ("Informações do AdotePet", {"fields": ("tipo_usuario", "telefone")}),
+        )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+            ("Informações do AdotePet", {"fields": ("tipo_usuario", "telefone")}),
+        )
+    
 @admin.register(Especie)
 class EspecieAdmin(admin.ModelAdmin):
     list_display=("id","nome")
@@ -14,7 +28,7 @@ class EspecieAdmin(admin.ModelAdmin):
 class RacaAdmin(admin.ModelAdmin):
     list_display=("id", "nome", "especie")
     list_filter=("especie",)
-    search_fields=("nome", "especie_nome")
+    search_fields=("nome", "especie__nome")
     ordering=("nome",)
 
 @admin.register(Pet)
@@ -31,20 +45,6 @@ class RegistroMedicoAdmin(admin.ModelAdmin):
     search_fields=("pet__nome", "tipo", "veterinario", "clinica",)
     ordering=("-data",)
 
-@admin.register(CronogramaVisita)
-class VisitasAdmin(admin.ModelAdmin):
-    list_display=("pet", "adotante", "data", "horario", "local", "status")
-    list_filter=("data", "status")
-    search_fields=("pet__nome", "adotante__username", "adotante__first_name", "adotante__last_name",)
-    ordering=("-data", "horario",)
-
-@admin.register(TermoAdocao)
-class TermoAdocaoAdmin(admin.ModelAdmin):
-    list_display=("pet", "adotante", "responsavel", "data_adocao")
-    list_filter=("data_adocao", "termos_aceitos")
-    search_fields=("pet__nome", "adotante__username", "adotante__first_name", "adotante__last_name", "responsavel__username", "responsavel__first_name", "responsavel__last_name",)
-    ordering=("-data_adocao", "pet__nome",)
-
 @admin.register(AplicacaoAdocao)
 class AplicacaoAdocaoAdmin(admin.ModelAdmin):
     list_display = ("pet", "adotante", "data_solicitacao", "status")
@@ -56,3 +56,36 @@ class AplicacaoAdocaoAdmin(admin.ModelAdmin):
         "adotante__last_name",
     )
     ordering = ("-data_solicitacao",)
+
+@admin.register(CronogramaVisita)
+class VisitasAdmin(admin.ModelAdmin):
+    list_display=("pet", "adotante", "data", "horario", "local", "status")
+    list_filter=("data", "status")
+    search_fields=("aplicacao__pet__nome", "aplicacao__adotante__username", "aplicacao__adotante__first_name", "aplicacao__adotante__last_name",)
+    ordering=("-data", "horario",)
+
+    def pet(self, obj):
+        return obj.aplicacao.pet
+
+    def adotante(self, obj):
+        return obj.aplicacao.adotante
+
+@admin.register(TermoAdocao)
+class TermoAdocaoAdmin(admin.ModelAdmin):
+    list_display=("pet", "adotante", "responsavel", "data_adocao")
+    list_filter=("data_adocao", "termos_aceitos")
+    search_fields=(
+        "aplicacao__pet__nome", 
+        "aplicacao__adotante__username", 
+        "aplicacao__adotante__first_name", 
+        "aplicacao__adotante__last_name", 
+        "responsavel__username", 
+        "responsavel__first_name", 
+        "responsavel__last_name",)
+    ordering=("-data_adocao",)
+
+    def pet(self, obj):
+        return obj.aplicacao.pet
+    
+    def adotante(self, obj):
+        return obj.aplicacao.adotante
