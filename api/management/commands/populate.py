@@ -3,9 +3,9 @@ import random
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from faker import Faker
-from adocao.models import (
-    Especie,Raca,Pet,RegistroMedico,CronogramaVisita,TermoAdocao,AplicacaoAdocao,Endereco
-)
+from usuarios.models import Endereco
+from pets.models import Especie, Raca, Pet, RegistroMedico
+from adocoes.models import TermoAdocao, CronogramaVisita, AplicacaoAdocao 
 
 class Command(BaseCommand):
     help = "Popula o banco de dados com dados fictícios usando Faker"
