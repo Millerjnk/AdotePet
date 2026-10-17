@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pets disponíveis | Adote um Pet</title>
+
+    <style>
+        body{
+            font-family: arial, sans-serif;
+            background-color: #f7f7f7;
+            margin:0;
+        }
+        header{
+            background-color: #7652a3;
+            color: white;
+            padding:24px;
+            text-align: center;
+        }
+        main{
+            max-width:1100px;
+            margin:35px auto;
+            padding:0 20px;
+        }
+        .list-pets{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            gap:20px;
+        }
+        .pet-card{
+            background:white;
+            border-radius:12px;
+            padding:20px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.08);
+        }
+        .pet-card h2 {
+            color: #7652a3;
+        }
+        .botao {
+            display: inline-block;
+            background-color: #7653a3;
+            color:white;
+            padding:10px 16px;
+            border-radius:6px;
+            text-decoration:none;
+        }
+        .botao:hover{
+            background-color: #5e3a7a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AdotePert</h1>
+        <p>Encontre seu novo melhor amigo!</p>
+    </header>
+    <main>
+        <h1>Pets disponíveis para adoção</h1>
+        <div class="'lista-pets">
+            {% for pet in pets %}
+                <div class="pet-card">
+                    <h2>{{pet.nome}}</div>h2>
+                    
+                    <p>strong>Espécie:</strong>{{pet.raca.especie.nome}}</p>
+                    <p><strong>Raça:</strong>{{pet.raca.nome}}</p>
+                    <p><strong>Sexo:</strong>{{pet.get_sexo_display}}</p>
+                    <p><strong>Porte:</strong>{{pet.get_porte_display}}</p>
+
+                    <a href = "#" class="botao">ver detalhes</a>
+                    </div>
+                {% empty %}
+                <p>Não há pets disponíveis para adoção no momento.</p>
+                {% endfor %}
+                </div>
+            </main>
+        </body>
+</html>
