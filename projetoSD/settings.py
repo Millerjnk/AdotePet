@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'adocao',
+    'usuarios',
+    'pets',
+    'adocoes',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -70,7 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'projetoSD.wsgi.application'
 
-AUTH_USER_MODEL = 'adocao.Usuario'
+AUTH_USER_MODEL = 'usuarios.Usuario'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
