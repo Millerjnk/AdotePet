@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes de {{ pet.nome }} - AdotePet{% endblock %}
+
+{% block content %}
+<a href="{% url 'lista_pets' %}" class="btn btn-outline-secondary mb-3">&larr; Voltar para o Catálogo</a>
+
+<!-- CARD COM FOTO À ESQUERDA E DADOS AO LADO -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      
+      <!-- COLUNA DA ESQUERDA: FOTO DO PET -->
+      <div class="col-md-5 mb-3 mb-md-0 text-center">
+        {% if pet.foto %}
+          <img src="{{ pet.foto.url }}" 
+               class="img-fluid rounded shadow-sm border" 
+               alt="{{ pet.nome }}" 
+               style="max-height: 350px; width: 100%; object-fit: cover; object-position: center;">
+        {% else %}
+          <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center shadow-sm" style="height: 280px;">
+            <span>Sem Foto Disponível</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- COLUNA DA DIREITA: INFORMAÇÕES DO PET -->
+      <div class="col-md-7">
+        <h2 class="fw-bold text-dark mb-3">{{ pet.nome }}</h2>
+        
+        <div class="mb-2">
+          <strong>Responsável:</strong> {{ pet.responsavel|default:"ONG / Protetor" }}
+        </div>
+        <div class="mb-2">
+          <strong>Raça:</strong> {{ pet.raca|default:"SRD / Não informada" }}
+        </div>
+        <div class="mb-2">
+          <strong>Porte:</strong> {{ pet.get_porte_display|default:pet.porte }}
+        </div>
+        <div class="mb-2">
+          <strong>Sexo:</strong> {{ pet.get_sexo_display|default:pet.sexo }}
+        </div>
+        <div class="mb-2">
+          <strong>Status:</strong> 
+          <span class="badge bg-custom-primary text-white ms-1">
+            {{ pet.get_status_display|default:pet.status }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TABELA DE REGISTROS MÉDICOS -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-custom-light">
+    <h5 class="mb-0 fw-bold">Histórico / Registros Médicos</h5>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for registro in registros_medicos %}
+          <tr>
+            <td>{{ registro.data|date:"d/m/Y" }}</td>
+            <td>{{ registro.tipo }}</td>
+            <td>{{ registro.descricao }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="3" class="text-center text-muted p-3">Nenhum registro médico cadastrado para este pet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BOTÕES DE AÇÃO -->
+<div class="d-flex gap-2 justify-content-end mb-4">
+  {% if user.is_authenticated and user.tipo_usuario == 'R' or user.is_staff %}
+    <!-- Exibido APENAS para Responsáveis ('R') / ONGs / Administradores -->
+    <a href="#" class="btn btn-warning fw-bold">Editar</a>
+    <a href="#" class="btn btn-danger fw-bold">Remover</a>
+  {% else %}
+    <!-- Exibido para Adotantes ('A') ou Usuários Não Autenticados (Visitantes) -->
+    <a href="#" class="btn btn-success btn-lg fw-bold">Tenho Interesse</a>
+  {% endif %}
+</div>
+{% endblock %}

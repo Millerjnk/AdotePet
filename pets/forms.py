@@ -1,5 +1,5 @@
 from django import forms
-from pets.models import Pet
+from pets.models import Pet, Raca, Especie
 
 class PetForm(forms.ModelForm):
     class Meta:
@@ -7,7 +7,6 @@ class PetForm(forms.ModelForm):
         fields = [
             'foto',
             'nome',
-            'especie',
             'raca',
             'data_nascimento',
             'peso',
@@ -19,7 +18,6 @@ class PetForm(forms.ModelForm):
         widgets = {
             'foto': forms.FileInput(attrs={'class': 'form-control'}),
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do pet'}),
-            'especie': forms.Select(attrs={'class': 'form-select'}),
             'raca': forms.Select(attrs={'class': 'form-select'}),
             'data_nascimento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'peso': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Peso em kg', 'step': '0.1'}),
@@ -27,6 +25,11 @@ class PetForm(forms.ModelForm):
             'porte': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ordena as raças pelo nome da espécie para agrupar visualmente
+        self.fields['raca'].queryset = Raca.objects.select_related('especie').order_by('especie__nome', 'nome')
 
     def clean_nome(self):
         nome = self.cleaned_data.get('nome')
