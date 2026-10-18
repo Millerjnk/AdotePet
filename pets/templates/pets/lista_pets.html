@@ -8,11 +8,11 @@
     <style>
         body{
             font-family: arial, sans-serif;
-            background-color: #f7f7f7;
+            background-color: #ade4fcae;
             margin:0;
         }
         header{
-            background-color: #7652a3;
+            background-color: #a374dd;
             color: white;
             padding:24px;
             text-align: center;
@@ -51,7 +51,7 @@
 </head>
 <body>
     <header>
-        <h1>AdotePert</h1>
+        <h1>AdotePet</h1>
         <p>Encontre seu novo melhor amigo!</p>
     </header>
     <main>
@@ -59,9 +59,9 @@
         <div class="'lista-pets">
             {% for pet in pets %}
                 <div class="pet-card">
-                    <h2>{{pet.nome}}</div>h2>
+                    <h2>{{pet.nome}}</div> <h2>
                     
-                    <p>strong>Espécie:</strong>{{pet.raca.especie.nome}}</p>
+                    <p><strong>Espécie:</strong>{{pet.raca.especie.nome}}</p>
                     <p><strong>Raça:</strong>{{pet.raca.nome}}</p>
                     <p><strong>Sexo:</strong>{{pet.get_sexo_display}}</p>
                     <p><strong>Porte:</strong>{{pet.get_porte_display}}</p>
