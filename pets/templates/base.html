@@ -59,16 +59,36 @@
           <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Visitas</a></li>
           <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Adoções</a></li>
 
-                    <!-- Opção de cadastro visível APENAS para Responsáveis ('R') ou Admins -->
-          {% if user.is_authenticated and user.tipo_usuario == 'R' or user.is_staff %}
-            <li class="nav-item">
-              <a class="nav-link btn btn-custom-primary text-white fw-semibold" href="{% url 'cadastrar_pet' %}">
-                Cadastrar
+          {% if user.is_authenticated %}
+            <!-- Opção de cadastro visível APENAS para Responsáveis ('R') ou Admins -->
+            {% if user.tipo_usuario == 'R' or user.is_staff %}
+              <li class="nav-item">
+                <a class="nav-link btn btn-custom-primary text-white fw-semibold" href="{% url 'cadastrar_pet' %}">
+                  Cadastrar
+                </a>
+              </li>
+            {% endif %}
+
+            <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Perfil</a></li>
+
+            <!-- Botão de Sair/Logout via POST (Padrão Django 4/5) -->
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm fw-semibold px-3">
+                  Sair
+                </button>
+              </form>
+            </li>
+
+          {% else %}
+            <!-- Se o usuário estiver deslogado -->
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <a class="btn btn-outline-light btn-sm fw-semibold px-3" href="{% url 'login' %}">
+                Entrar
               </a>
             </li>
           {% endif %}
-
-          <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Perfil</a></li>
         </ul>
       </div>
     </div>

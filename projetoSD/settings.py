@@ -106,6 +106,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'lista_pets'
+LOGIN_REDIRECT_URL = 'lista_pets'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
