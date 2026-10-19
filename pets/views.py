@@ -43,14 +43,15 @@ def detalhe_pet(request, pk):
     pet = get_object_or_404(Pet, pk=pk)
     r_medicos = RegistroMedico.objects.filter(pet=pet)
 
+    pode_gerenciar = False
+    
+    if request.user.is_authenticated:
+        pode_gerenciar = (request.user.tipo_usuario == 'R' and pet.responsavel_id == request.user.pk) or request.user.is_staff
+
     context = {
         'pet': pet,
         'registros_medicos': r_medicos,
-        'pode_gerenciar': (
-            request.user.is_authenticated
-            and request.user.tipo_usuario == 'R'
-            and pet.responsavel_id == request.user.pk
-        ),
+        'pode_gerenciar': pode_gerenciar
     }
 
     return render(request, 'pets/detalhe_pet.html', context)
@@ -64,7 +65,7 @@ def cadastrar_pet(request):
             if request.user.is_authenticated:
                 pet.responsavel = request.user
             else:
-                pet.responsavel = User.objets.first()
+                pet.responsavel = User.objects.first()
             pet.save()
             messages.success(request, 'Pet cadastrado com sucesso!')
             return redirect('lista_pets')
@@ -78,7 +79,9 @@ def cadastrar_pet(request):
 
 def _pet_do_responsavel(request, pk):
     pet = get_object_or_404(Pet, pk=pk)
-    if request.user.tipo_usuario != 'R' or pet.responsavel_id != request.user.pk:
+    pode_alterar = request.user.is_staff or (request.user.tipo_usuario == 'R' and pet.responsavel_id == request.user.pk)
+
+    if not pode_alterar:
         raise PermissionDenied('Somente o responsável por este pet pode alterá-lo.')
     return pet
 
