@@ -44,7 +44,7 @@ def detalhe_pet(request, pk):
     r_medicos = RegistroMedico.objects.filter(pet=pet)
 
     pode_gerenciar = False
-    
+
     if request.user.is_authenticated:
         pode_gerenciar = (request.user.tipo_usuario == 'R' and pet.responsavel_id == request.user.pk) or request.user.is_staff
 
@@ -107,19 +107,22 @@ def editar_pet(request, pk):
 @require_http_methods(['GET', 'POST'])
 def remover_pet(request, pk):
     pet = _pet_do_responsavel(request, pk)
+
+    processo_andamento = pet.status == 'A'
+
     if request.method == 'POST':
+        if processo_andamento:
+            messages.error(request,'Este pet possui um processo de adoção em andamento e não pode ser'
+                           ' removido no momento.')
+            return redirect('detalhe_pet', pk=pet.pk)
         try:
             pet.delete()
+            messages.success(request, 'Pet removido com sucesso!')
+            return redirect('lista_pets')
         except ProtectedError:
-            messages.error(
-                request,
-                'Este pet possui solicitações de adoção e não pode ser removido. '
-                'O histórico de adoções deve ser preservado.'
-            )
+            messages.error(request, 'Este pet possui registros associados e não pode ser removido. ')
             return redirect('detalhe_pet', pk=pet.pk)
-        messages.success(request, 'Pet removido com sucesso!')
-        return redirect('lista_pets')
     return render(request, 'pets/remover_pet.html', {
         'pet': pet,
-        'possui_solicitacoes': pet.aplicacoes_adocao.exists(),
+        'possui_solicitacoes': processo_andamento,
     })
