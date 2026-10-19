@@ -85,11 +85,11 @@
 
 <!-- BOTÕES DE AÇÃO -->
 <div class="d-flex gap-2 justify-content-end mb-4">
-  {% if user.is_authenticated and user.tipo_usuario == 'R' or user.is_staff %}
-    <!-- Exibido APENAS para Responsáveis ('R') / ONGs / Administradores -->
-    <a href="#" class="btn btn-warning fw-bold">Editar</a>
-    <a href="#" class="btn btn-danger fw-bold">Remover</a>
-  {% else %}
+  {% if pode_gerenciar %}
+    <!-- Exibido apenas ao responsável deste pet -->
+    <a href="{% url 'editar_pet' pet.pk %}" class="btn btn-warning fw-bold">Editar</a>
+    <a href="{% url 'remover_pet' pet.pk %}" class="btn btn-danger fw-bold">Remover</a>
+  {% elif not user.is_authenticated or user.tipo_usuario == 'A' %}
     <!-- Exibido para Adotantes ('A') ou Usuários Não Autenticados (Visitantes) -->
     <a href="#" class="btn btn-success btn-lg fw-bold">Tenho Interesse</a>
   {% endif %}

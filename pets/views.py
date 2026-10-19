@@ -1,3 +1,6 @@
+from django.core.exceptions import PermissionDenied
+from django.db.models.deletion import ProtectedError
+from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
@@ -43,6 +46,11 @@ def detalhe_pet(request, pk):
     context = {
         'pet': pet,
         'registros_medicos': r_medicos,
+        'pode_gerenciar': (
+            request.user.is_authenticated
+            and request.user.tipo_usuario == 'R'
+            and pet.responsavel_id == request.user.pk
+        ),
     }
 
     return render(request, 'pets/detalhe_pet.html', context)
@@ -66,3 +74,49 @@ def cadastrar_pet(request):
         form = PetForm()
 
     return render(request, 'pets/cadastrar_pet.html', {'form': form})
+
+
+def _pet_do_responsavel(request, pk):
+    pet = get_object_or_404(Pet, pk=pk)
+    if request.user.tipo_usuario != 'R' or pet.responsavel_id != request.user.pk:
+        raise PermissionDenied('Somente o responsável por este pet pode alterá-lo.')
+    return pet
+
+
+@login_required(login_url='login')
+@require_http_methods(['GET', 'POST'])
+def editar_pet(request, pk):
+    pet = _pet_do_responsavel(request, pk)
+    if request.method == 'POST':
+        form = PetForm(request.POST, request.FILES, instance=pet)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pet atualizado com sucesso!')
+            return redirect('detalhe_pet', pk=pet.pk)
+        messages.error(request, 'Não foi possível atualizar o pet. Confira os campos abaixo.')
+    else:
+        form = PetForm(instance=pet)
+    form.fields['data_nascimento'].widget.format = '%Y-%m-%d'
+    return render(request, 'pets/editar_pet.html', {'form': form, 'pet': pet})
+
+
+@login_required(login_url='login')
+@require_http_methods(['GET', 'POST'])
+def remover_pet(request, pk):
+    pet = _pet_do_responsavel(request, pk)
+    if request.method == 'POST':
+        try:
+            pet.delete()
+        except ProtectedError:
+            messages.error(
+                request,
+                'Este pet possui solicitações de adoção e não pode ser removido. '
+                'O histórico de adoções deve ser preservado.'
+            )
+            return redirect('detalhe_pet', pk=pet.pk)
+        messages.success(request, 'Pet removido com sucesso!')
+        return redirect('lista_pets')
+    return render(request, 'pets/remover_pet.html', {
+        'pet': pet,
+        'possui_solicitacoes': pet.aplicacoes_adocao.exists(),
+    })
