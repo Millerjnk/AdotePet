@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Remover Pet - AdotePet{% endblock %}
+{% block content %}
+<div class="row justify-content-center py-3"><div class="col-md-8">
+  <div class="card shadow border-0">
+    <div class="card-header bg-danger text-white"><h4 class="mb-0">Remover {{ pet.nome }}</h4></div>
+    <div class="card-body p-4">
+      {% if possui_solicitacoes %}
+        <div class="alert alert-warning">Este pet possui solicitações de adoção e não pode ser removido. O histórico de adoções deve ser preservado.</div>
+        <a href="{% url 'detalhe_pet' pet.pk %}" class="btn btn-secondary">Voltar</a>
+      {% else %}
+        <p>Tem certeza de que deseja remover <strong>{{ pet.nome }}</strong>?</p>
+        <p>Esta ação não pode ser desfeita. Os registros médicos vinculados ao pet também serão removidos.</p>
+        <form method="post">
+          {% csrf_token %}
+          <a href="{% url 'detalhe_pet' pet.pk %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-danger">Confirmar remoção</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div></div>
+{% endblock %}

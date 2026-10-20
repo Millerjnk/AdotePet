@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'adocao',
+    'usuarios',
+    'pets',
+    'adocoes',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +58,7 @@ ROOT_URLCONF = 'projetoSD.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,7 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'projetoSD.wsgi.application'
 
-AUTH_USER_MODEL = 'adocao.Usuario'
+AUTH_USER_MODEL = 'usuarios.Usuario'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -101,6 +104,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'lista_pets'
+LOGIN_REDIRECT_URL = 'lista_pets'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

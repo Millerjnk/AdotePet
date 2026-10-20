@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AdotePet{% endblock %}</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Estilos e Cores Padrão da Aplicação -->
+  <style>
+    :root {
+      --cor-principal: #a374dd;
+      --cor-fundo-suave: #feffff;
+    }
+
+    body {
+      background-color: #8bdcffae;
+    }
+
+    .bg-custom-primary {
+      background-color: var(--cor-principal) !important;
+    }
+
+    .btn-custom-primary {
+      background-color: var(--cor-principal) !important;
+      color: #ffffff !important;
+      border: none;
+    }
+
+    .btn-custom-primary:hover {
+      background-color: #8f5ec4 !important;
+      color: #ffffff !important;
+    }
+
+    .bg-custom-light {
+      background-color: var(--cor-fundo-suave) !important;
+    }
+
+    .border-custom {
+      border-color: var(--cor-principal) !important;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- NAVBAR PADRÃO DA APLICAÇÃO -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-custom-primary mb-4 shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'lista_pets' %}">AdotePet</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link text-white fw-semibold" href="{% url 'lista_pets' %}">Pets</a></li>
+          <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Visitas</a></li>
+          <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Adoções</a></li>
+
+          {% if user.is_authenticated %}
+            <!-- Opção de cadastro visível APENAS para Responsáveis ('R') ou Admins -->
+            {% if user.tipo_usuario == 'R' or user.is_staff %}
+              <li class="nav-item">
+                <a class="nav-link btn btn-custom-primary text-white fw-semibold" href="{% url 'cadastrar_pet' %}">
+                  Cadastrar
+                </a>
+              </li>
+            {% endif %}
+
+            <li class="nav-item"><a class="nav-link text-white fw-semibold" href="#">Perfil</a></li>
+
+            <!-- Botão de Sair/Logout via POST (Padrão Django 4/5) -->
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm fw-semibold px-3">
+                  Sair
+                </button>
+              </form>
+            </li>
+
+          {% else %}
+            <!-- Se o usuário estiver deslogado -->
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <a class="btn btn-outline-light btn-sm fw-semibold px-3" href="{% url 'login' %}">
+                Entrar
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MENSAGENS DE FEEDBACK (DJANGO MESSAGES FRAMEWORK) -->
+  <div class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- CONTEÚDO ESPECÍFICO DE CADA TELA -->
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

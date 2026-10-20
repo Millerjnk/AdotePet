@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Pets - AdotePet{% endblock %}
+
+{% block content %}
+<!-- BARRA DE PESQUISA E FILTRAGEM -->
+<div class="card p-3 mb-4 shadow-sm bg-custom-light border-custom">
+  <form method="GET" action="{% url 'lista_pets' %}" class="row g-3">
+    <!-- Pesquisa por nome -->
+    <div class="col-md-3">
+      <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Nome do pet...">
+    </div>
+
+    <!-- Filtro por Porte -->
+    <div class="col-md-3">
+      <select name="porte" class="form-select">
+        <option value="">Todos os Portes</option>
+        <option value="P" {% if porte_selecionado == 'P' %}selected{% endif %}>Pequeno</option>
+        <option value="M" {% if porte_selecionado == 'M' %}selected{% endif %}>Médio</option>
+        <option value="G" {% if porte_selecionado == 'G' %}selected{% endif %}>Grande</option>
+      </select>
+    </div>
+
+    <!-- Filtro por Sexo -->
+    <div class="col-md-3">
+      <select name="sexo" class="form-select">
+        <option value="">Todos os Sexos</option>
+        <option value="M" {% if sexo_selecionado == 'M' %}selected{% endif %}>Macho</option>
+        <option value="F" {% if sexo_selecionado == 'F' %}selected{% endif %}>Fêmea</option>
+      </select>
+    </div>
+
+    <!-- Botão de submissão -->
+    <div class="col-md-3 d-grid">
+      <button type="submit" class="btn btn-custom-primary fw-bold">Filtrar</button>
+    </div>
+  </form>
+</div>
+
+<!-- LISTA DE PETS -->
+<h3 class="mb-3 fw-bold text-dark">Pets Disponíveis para Adoção</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {% for pet in page_obj %}
+    <div class="col">
+      <div class="card h-100 shadow-sm border-0">
+        {% if pet.foto %}
+          <img src="{{ pet.foto.url }}" class="card-img-top" alt="{{ pet.nome }}" style="height: 220px; object-fit: cover;">
+        {% else %}
+          <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 220px;">
+            <span>Sem Foto</span>
+          </div>
+        {% endif %}
+        <div class="card-body text-center">
+          <h5 class="card-title fw-bold">{{ pet.nome }}</h5>
+          <p class="card-text text-muted mb-2">
+            <strong>Porte:</strong> {{ pet.get_porte_display|default:pet.porte }} | 
+            <strong>Sexo:</strong> {{ pet.get_sexo_display|default:pet.sexo }}
+          </p>
+          <a href="{% url 'detalhe_pet' pet.pk %}" class="btn btn-custom-primary w-100">Ver Detalhes</a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info text-center">Nenhum pet encontrado com os filtros selecionados.</div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- PAGINAÇÃO -->
+{% if page_obj.has_other_pages %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&porte={{ porte_selecionado }}&sexo={{ sexo_selecionado }}">Anterior</a>
+        </li>
+      {% endif %}
+
+      <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&porte={{ porte_selecionado }}&sexo={{ sexo_selecionado }}">Próxima</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}
